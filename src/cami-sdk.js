@@ -40,12 +40,8 @@ camisdk.Client = (function (apiKey, development) {
             obj.status = request.status;
             callback(obj);
         };
-        //request.setRequestHeader("Authentication", "apikey " + apiKey);
-        //request.setRequestHeader("Accept", "application/json");
-        //request.setRequestHeader("Access-Control-Allow-Origin", "*");
-        //request.setRequestHeader("Origin", "");
+        request.setRequestHeader("Accept", "application/json");
         request.send();
-        //return JSON.parse(request.responseText);
     }
     
     /**
@@ -53,6 +49,10 @@ camisdk.Client = (function (apiKey, development) {
      */
     function requestPOST(url, form, data, callback)
     {
+        var formdata = new FormData();
+        for (var key in form) { formdata.append(key, form[key]); }
+        for (var bin in data) { formdata.append("bin[]", bin); }
+        
         var request = new XMLHttpRequest();
         request.open("POST", server+url, true);
         request.onerror = function()
@@ -61,14 +61,6 @@ camisdk.Client = (function (apiKey, development) {
         };
         request.onload = function()
         {
-            /*
-            if (request.readystate == 4 && request.status == 200)
-            {
-            }
-            else if (request.status != 200)
-            {
-            }
-            */
             var obj = {};
             try
             {
@@ -80,13 +72,8 @@ camisdk.Client = (function (apiKey, development) {
             obj.status = request.status;
             callback(obj);
         };        
-        //request.setRequestHeader("Authentication", "apikey " + apiKey);
-        //request.setRequestHeader("Accept", "application/json");
-        //request.setRequestHeader("Content-type", "application/json");
-        //request.send(formdata);
-        request.send(form);
-        //return request.responseText;
-        //return JSON.parse(request.responseText);
+        request.setRequestHeader("Accept", "application/json");
+        request.send(formdata);
     }
 
     var cami = {};
@@ -132,15 +119,16 @@ camisdk.Client = (function (apiKey, development) {
     
     cami.penny =
     {
+        base_url: "penny/",
+        
         sendMessage: function(user_info, message, callback)
         {
-            var url = "penny/";
             var formdata = {};
             formdata.datetime = new Date();
             formdata.message = message;
             formdata.user = apiKey;
             if (user_info.username) formdata.username = user_info.username;
-            return requestPOST(url, formdata, callback);
+            return requestPOST(this.base_url, formdata, null, callback);
         },
         
         uploadFiles: function(user_info, data, callback)
